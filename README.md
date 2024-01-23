@@ -45,7 +45,7 @@ sed -i '/swap/d' /etc/fstab
 swapoff -a
 ```
 
-* Install containerd
+* Install and configure containerd
 ```
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
@@ -68,7 +68,24 @@ systemctl enable containerd
 systemctl restart containerd
 ```
 
+* Install Kubernetes packages
+```
+cat >>/etc/yum.repos.d/kubernetes.repo<<EOF
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
 
+VERSION=1.26.0
+
+yum install -y kubelet-$VERSION-0 kubeadm-$VERSION-0 kubectl-$VERSION-0 --disableexcludes=kubernetes
+
+yum versionlock kubelet-$VERSION-0 kubeadm-$VERSION-0 kubectl-$VERSION-0
+```
 # Step 2 – Load Balancer Deployment
 - Load balancer can be of the following types:
   - Nginx
