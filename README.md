@@ -171,12 +171,64 @@ backend rke2_server
 ```
 
 #  Step 3 – Set up the First Server Node (Master Node)
-* Install RKE2 server
+* Create cluster (on master node)
 ```
-curl -sfL https://get.rke2.io --output install.sh
-chmod +x install.sh
-sudo INSTALL_RKE2_TYPE=server ./install.sh
+kubeadm init --control-plane-endpoint=192.168.2.85:6443 --upload-certs --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.26.0
 ```
+
+* Use kubeadm init to bootstrap the cluster
+```
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of the control-plane node running the following command on each as root:
+
+  kubeadm join 192.168.2.85:6443 --token r4w09j.1aeqd3cjk0tl5ttf \
+        --discovery-token-ca-cert-hash sha256:91160eda2f93b0f01b82218f78e5735890799b6000cd6e71d03a69ee24d091c0 \
+        --control-plane --certificate-key 524dc72e322d3e4dfb44060fa4584c94d8a611da29db28280ad1017be7731b52
+
+Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
+As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use
+"kubeadm init phase upload-certs --upload-certs" to reload certs afterward.
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 192.168.2.85:6443 --token r4w09j.1aeqd3cjk0tl5ttf \
+        --discovery-token-ca-cert-hash sha256:91160eda2f93b0f01b82218f78e5735890799b6000cd6e71d03a69ee24d091c0
+```
+
+
+**In case you lost the kubeadm join command. You can just create the new one with**
+```
+kubeadm token create --print-join-command
+```
+
+* Verify the status of the master node
+```
+kubectl get node -owide
+NAME               STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+master1.rke2.com   Ready    control-plane   24h   v1.26.0   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+```
+
+* Create the pod network with Calico
+```
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
+```
+
+Link: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
 * RKE2 config file for first server
 ```
