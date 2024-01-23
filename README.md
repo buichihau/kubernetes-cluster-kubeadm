@@ -230,38 +230,35 @@ kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/m
 
 Link: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
-* RKE2 config file for first server
+* Check if all the system pods and calico pods to change to Running
 ```
-cat >>/etc/rancher/rke2/config.yaml<<EOF
-token: rke2-k8s-sTill-win-@-zay
-tls-san:
-  - lb.rke2.com
-  - 192.168.2.85
-  - 192.168.2.104
-  - 192.168.2.105
-  - 192.168.2.106
-  - master1.rke2.com 
-  - master2.rke2.com
-  - master3.rke2.com 
-node-ip: 192.168.2.104
-node-name: master1.rke2.com
-EOF
-```
-Link conf: https://docs.rke2.io/reference/server_config
+kubectl get pods --all-namespaces
 
-* Start the service
-```
-sudo systemctl start rke2-server
-sudo systemctl enable rke2-server
+NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-56dd5794f-9726h   1/1     Running   0          7d
+kube-system   calico-node-6slmv                         1/1     Running   0          2m22s
+kube-system   calico-node-qltjv                         1/1     Running   0          7d
+kube-system   calico-node-r9t6l                         1/1     Running   0          2m6s
+kube-system   coredns-787d4945fb-g5r4n                  1/1     Running   0          7d
+kube-system   coredns-787d4945fb-njd7s                  1/1     Running   0          7d
+kube-system   etcd-master1.rke2.com                     1/1     Running   0          7d
+kube-system   kube-apiserver-master1.rke2.com           1/1     Running   0          7d
+kube-system   kube-controller-manager-master1.rke2.com  1/1     Running   0          7d
+kube-system   kube-proxy-fnzq8                          1/1     Running   0          2m22s
+kube-system   kube-proxy-gtdpm                          1/1     Running   0          7d
+kube-system   kube-proxy-qhq2w                          1/1     Running   0          2m6s
+kube-system   kube-scheduler-master1.rke2.com           1/1     Running   0          7d
 ```
 
-* install kubeclt
+* Check out the systemd kubelet , it's no longer crashlooping because it has static pods to start
 ```
-curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin/kubectl
-export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
-kubectl version
+sudo systemctl status kubelet.service
+```
+
+* Let's check out the static pod manifests on the Control Plane Node
+```
+ls /etc/kubernetes/manifests
+etcd.yaml  kube-apiserver.yaml  kube-controller-manager.yaml  kube-scheduler.yaml
 ```
 
 * Setup terminal
@@ -270,12 +267,11 @@ echo 'alias k=kubectl' >> ~/.bashrc
 echo 'alias c=clear' >> ~/.bashrc
 ```
 
-* After some time, check if the node and pods are up:
+* install helm
 ```
-$ kubectl get nodes
-NAME               STATUS   ROLES                       AGE   VERSION
-master1.rke2.com   Ready    control-plane,etcd,master   9h    v1.26.12+rke2r1
-
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
 ```
 
 # Step 4 – Set up additional Server Nodes (Master Nodes)
