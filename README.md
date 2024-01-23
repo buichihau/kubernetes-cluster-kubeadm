@@ -69,6 +69,7 @@ systemctl restart containerd
 ```
 
 * Install Kubernetes packages
+
 Install v1.26.0 kubernetes packages
 
 ```
