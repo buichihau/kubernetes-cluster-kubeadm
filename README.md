@@ -89,6 +89,12 @@ yum install -y kubelet-$VERSION-0 kubeadm-$VERSION-0 kubectl-$VERSION-0 --disabl
 
 yum versionlock kubelet-$VERSION-0 kubeadm-$VERSION-0 kubectl-$VERSION-0
 ```
+
+* Enable Kubelet
+```
+sudo systemctl enable --now kubelet
+```
+
 # Step 2 – Load Balancer Deployment
 - Load balancer can be of the following types:
   - Nginx
