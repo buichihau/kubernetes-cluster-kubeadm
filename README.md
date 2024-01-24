@@ -267,6 +267,15 @@ echo 'alias k=kubectl' >> ~/.bashrc
 echo 'alias c=clear' >> ~/.bashrc
 ```
 
+* install kubeclt
+```
+curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+kubectl version
+```
+
 * install helm
 ```
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
@@ -276,11 +285,11 @@ chmod 700 get_helm.sh
 
 # Step 4 – Set up additional Server Nodes (Master Nodes)
 
-* Install RKE2 server
+* Join master node
 ```
-curl -sfL https://get.rke2.io --output install.sh
-chmod +x install.sh
-sudo INSTALL_RKE2_TYPE=server ./install.sh
+kubeadm join 192.168.2.85:6443 --token r4w09j.1aeqd3cjk0tl5ttf \
+      --discovery-token-ca-cert-hash sha256:91160eda2f93b0f01b82218f78e5735890799b6000cd6e71d03a69ee24d091c0 \
+      --control-plane --certificate-key 524dc72e322d3e4dfb44060fa4584c94d8a611da29db28280ad1017be7731b52
 ```
 
 * RKE2 config file for second server (master2)
