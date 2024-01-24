@@ -292,6 +292,18 @@ kubeadm join 192.168.2.85:6443 --token r4w09j.1aeqd3cjk0tl5ttf \
       --control-plane --certificate-key 524dc72e322d3e4dfb44060fa4584c94d8a611da29db28280ad1017be7731b52
 ```
 
+
+* After some time, check the status of the nodes
+
+```
+ kubectl get node -owide
+NAME                                   STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+master1.rke2.com    Ready    control-plane   36h   v1.26.0   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+master2.rke2.com   Ready    control-plane   35h   v1.26.0   192.168.2.105   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+master3.rke2.com    Ready    control-plane   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+
+```
+
 * RKE2 config file for second server (master2)
 ```
 cat >>/etc/rancher/rke2/config.yaml<<EOF
