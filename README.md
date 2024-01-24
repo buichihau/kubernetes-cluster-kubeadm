@@ -301,196 +301,54 @@ NAME                                   STATUS   ROLES           AGE   VERSION   
 master1.rke2.com    Ready    control-plane   36h   v1.26.0   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 master2.rke2.com   Ready    control-plane   35h   v1.26.0   192.168.2.105   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 master3.rke2.com    Ready    control-plane   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
-
 ```
 
-* RKE2 config file for second server (master2)
+* Check if all the system pods and calico pods to change to Running
 ```
-cat >>/etc/rancher/rke2/config.yaml<<EOF
-server: https://192.168.2.85:9345
-token: rke2-k8s-sTill-win-@-zay
-tls-san:
-  - lb.rke2.com
-  - 192.168.2.85
-  - 192.168.2.104
-  - 192.168.2.105
-  - 192.168.2.106
-  - master1.rke2.com 
-  - master2.rke2.com
-  - master3.rke2.com 
-node-ip: 192.168.2.105
-node-name: master2.rke2.com
-EOF
+kubectl get pods --all-namespaces
+
+NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-56dd5794f-9726h   1/1     Running   0          7d
+kube-system   calico-node-6slmv                         1/1     Running   0          2m22s
+kube-system   calico-node-qltjv                         1/1     Running   0          7d
+kube-system   calico-node-r9t6l                         1/1     Running   0          2m6s
+kube-system   coredns-787d4945fb-g5r4n                  1/1     Running   0          7d
+kube-system   coredns-787d4945fb-njd7s                  1/1     Running   0          7d
+kube-system   etcd-master1.rke2.com                     1/1     Running   0          7d
+kube-system   etcd-master2.rke2.com                     1/1     Running   0          7d
+kube-system   etcd-master3.rke2.com                     1/1     Running   0          7d
+kube-system   kube-apiserver-master1.rke2.com           1/1     Running   0          7d
+kube-system   kube-apiserver-master2.rke2.com           1/1     Running   0          7d
+kube-system   kube-apiserver-master3.rke2.com           1/1     Running   0          7d
+kube-system   kube-controller-manager-master1.rke2.com  1/1     Running   0          7d
+kube-system   kube-controller-manager-master2.rke2.com  1/1     Running   0          7d
+kube-system   kube-controller-manager-master3.rke2.com  1/1     Running   0          7d
+kube-system   kube-proxy-fnzq8                          1/1     Running   0          2m22s
+kube-system   kube-proxy-gtdpm                          1/1     Running   0          7d
+kube-system   kube-proxy-qhq2w                          1/1     Running   0          2m6s
+kube-system   kube-scheduler-master1.rke2.com           1/1     Running   0          7d
+kube-system   kube-scheduler-master2.rke2.com           1/1     Running   0          7d
+kube-system   kube-scheduler-master3.rke2.com           1/1     Running   0          7d
+```
+# Step 5 – Set up Agent Nodes (Worker Nodes)
+
+* Join any number of worker nodes
+```
+kubeadm join 192.168.2.85:6443 --token r4w09j.1aeqd3cjk0tl5ttf \
+        --discovery-token-ca-cert-hash sha256:91160eda2f93b0f01b82218f78e5735890799b6000cd6e71d03a69ee24d091c0
 ```
 
-* RKE2 config file for third  server (master3)
-```
-cat >>/etc/rancher/rke2/config.yaml<<EOF
-server: https://192.168.2.85:9345
-token: rke2-k8s-sTill-win-@-zay
-tls-san:
-  - lb.rke2.com
-  - 192.168.2.85
-  - 192.168.2.104
-  - 192.168.2.105
-  - 192.168.2.106
-  - master1.rke2.com 
-  - master2.rke2.com
-  - master3.rke2.com 
-node-ip: 192.168.2.106
-node-name: master3.rke2.com
-EOF
-```
-
-* start the service
-```
-sudo systemctl start rke2-server
-sudo systemctl enable rke2-server
-```
 * After some time, check the status of the nodes
 ```
 kubectl get node -owide
-NAME               STATUS   ROLES                       AGE   VERSION           INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
-master1.rke2.com   Ready    control-plane,etcd,master   10h   v1.26.12+rke2r1   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-master2.rke2.com   Ready    control-plane,etcd,master   22m   v1.26.12+rke2r1   192.168.2.105   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-master3.rke2.com   Ready    control-plane,etcd,master   11m   v1.26.12+rke2r1   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-```
-
-# Step 5 – Set up Agent Nodes (Worker Nodes)
-
-* Install RKE2 agent
-```
-curl -sfL https://get.rke2.io --output install.sh
-chmod +x install.sh
-sudo INSTALL_RKE2_TYPE=agent ./install.sh
-```
-
-* RKE2 config file for Agent Nodes (Worker 1)
-```
-cat >>/etc/rancher/rke2/config.yaml<<EOF
-server: https://192.168.2.85:9345
-token: rke2-k8s-sTill-win-@-zay
-tls-san:
-  - lb.rke2.com
-  - 192.168.2.85
-  - 192.168.2.104
-  - 192.168.2.105
-  - 192.168.2.106
-  - master1.rke2.com 
-  - master2.rke2.com
-  - master3.rke2.com 
-node-ip: 192.168.2.107
-node-name: worker1.rke2.com
+NAME                                   STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+master1.rke2.com    Ready    control-plane   36h   v1.26.0   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+master2.rke2.com   Ready    control-plane   35h   v1.26.0   192.168.2.105   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+master3.rke2.com    Ready    control-plane   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+worker1.rke2.com    Ready    <none>   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+worker2.rke2.com   Ready    <none>   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+worker3.rke2.com   Ready    <none>   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 EOF
-```
-
-* RKE2 config file for Agent Nodes (Worker 2)
-```
-cat >>/etc/rancher/rke2/config.yaml<<EOF
-server: https://192.168.2.85:9345
-token: rke2-k8s-sTill-win-@-zay
-tls-san:
-  - lb.rke2.com
-  - 192.168.2.85
-  - 192.168.2.104
-  - 192.168.2.105
-  - 192.168.2.106
-  - master1.rke2.com 
-  - master2.rke2.com
-  - master3.rke2.com 
-node-ip: 192.168.2.108
-node-name: worker2.rke2.com
-EOF
-```
-
-* RKE2 config file for Agent Nodes (Worker 3)
-```
-cat >>/etc/rancher/rke2/config.yaml<<EOF
-server: https://192.168.2.85:9345
-token: rke2-k8s-sTill-win-@-zay
-tls-san:
-  - lb.rke2.com
-  - 192.168.2.85
-  - 192.168.2.104
-  - 192.168.2.105
-  - 192.168.2.106
-  - master1.rke2.com 
-  - master2.rke2.com
-  - master3.rke2.com 
-node-ip: 192.168.2.109
-node-name: worker3.rke2.com
-EOF
-```
-
-* start the service rke2-agent
-```
-sudo systemctl start rke2-agent
-sudo systemctl enable rke2-agent
-```
-
-* After some time, check the status of the nodes
-```
- kubectl get node -owide
-NAME               STATUS   ROLES                       AGE    VERSION           INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
-master1.rke2.com   Ready    control-plane,etcd,master   12h    v1.26.12+rke2r1   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-master2.rke2.com   Ready    control-plane,etcd,master   130m   v1.26.12+rke2r1   192.168.2.105   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-master3.rke2.com   Ready    control-plane,etcd,master   119m   v1.26.12+rke2r1   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-worker1.rke2.com   Ready    <none>                      23m    v1.26.12+rke2r1   192.168.2.107    <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-worker2.rke2.com   Ready    <none>                      23m    v1.26.12+rke2r1   192.168.2.108    <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-worker3.rke2.com   Ready    <none>                      23m    v1.26.12+rke2r1   192.168.2.109    <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.7.11-k3s2
-```
-
-* Check pods
-```
-kubectl get pod -A
-NAMESPACE     NAME                                                    READY   STATUS      RESTARTS   AGE
-kube-system   cloud-controller-manager-master1.rke2.com               1/1     Running     0          12h
-kube-system   cloud-controller-manager-master2.rke2.com               1/1     Running     0          132m
-kube-system   cloud-controller-manager-master3.rke2.com               1/1     Running     0          120m
-kube-system   etcd-master1.rke2.com                                   1/1     Running     0          12h
-kube-system   etcd-master2.rke2.com                                   1/1     Running     0          131m
-kube-system   etcd-master3.rke2.com                                   1/1     Running     0          120m
-kube-system   helm-install-rke2-canal-l28sd                           0/1     Completed   0          12h
-kube-system   helm-install-rke2-coredns-8pb9f                         0/1     Completed   0          12h
-kube-system   helm-install-rke2-ingress-nginx-sdvh6                   0/1     Completed   0          12h
-kube-system   helm-install-rke2-metrics-server-9rkhv                  0/1     Completed   0          12h
-kube-system   helm-install-rke2-snapshot-controller-7s5xs             0/1     Completed   1          12h
-kube-system   helm-install-rke2-snapshot-controller-crd-88rf8         0/1     Completed   0          12h
-kube-system   helm-install-rke2-snapshot-validation-webhook-lvhwl     0/1     Completed   0          12h
-kube-system   kube-apiserver-master1.rke2.com                         1/1     Running     0          12h
-kube-system   kube-apiserver-master2.rke2.com                         1/1     Running     0          132m
-kube-system   kube-apiserver-master3.rke2.com                         1/1     Running     0          120m
-kube-system   kube-controller-manager-master1.rke2.com                1/1     Running     0          12h
-kube-system   kube-controller-manager-master2.rke2.com                1/1     Running     0          132m
-kube-system   kube-controller-manager-master3.rke2.com                1/1     Running     0          120m
-kube-system   kube-proxy-master1.rke2.com                             1/1     Running     0          12h
-kube-system   kube-proxy-master2.rke2.com                             1/1     Running     0          132m
-kube-system   kube-proxy-master3.rke2.com                             1/1     Running     0          120m
-kube-system   kube-proxy-worker3.rke2.com                             1/1     Running     0          25m
-kube-system   kube-proxy-worker2.rke2.com                             1/1     Running     0          25m
-kube-system   kube-proxy-worker1.rke2.com                             1/1     Running     0          25m
-kube-system   kube-scheduler-master1.rke2.com                         1/1     Running     0          12h
-kube-system   kube-scheduler-master2.rke2.com                         1/1     Running     0          132m
-kube-system   kube-scheduler-master3.rke2.com                         1/1     Running     0          120m
-kube-system   rke2-canal-5l4sl                                        2/2     Running     0          121m
-kube-system   rke2-canal-8dqnt                                        2/2     Running     0          12h
-kube-system   rke2-canal-hgl8c                                        2/2     Running     0          132m
-kube-system   rke2-canal-ddfjc                                        2/2     Running     0          25m
-kube-system   rke2-canal-fjfjc                                        2/2     Running     0          25m
-kube-system   rke2-canal-mj5jc                                        2/2     Running     0          25m
-kube-system   rke2-coredns-rke2-coredns-565dfc7d75-9m7pt              1/1     Running     0          132m
-kube-system   rke2-coredns-rke2-coredns-565dfc7d75-vmn8h              1/1     Running     0          12h
-kube-system   rke2-coredns-rke2-coredns-autoscaler-6c48c95bf9-852zt   1/1     Running     0          12h
-kube-system   rke2-ingress-nginx-controller-djf74                     1/1     Running     0          24m
-kube-system   rke2-ingress-nginx-controller-5qznc                     1/1     Running     0          24m
-kube-system   rke2-ingress-nginx-controller-lskud                     1/1     Running     0          24m
-kube-system   rke2-ingress-nginx-controller-f7tkk                     1/1     Running     0          131m
-kube-system   rke2-ingress-nginx-controller-n9nlj                     1/1     Running     0          120m
-kube-system   rke2-ingress-nginx-controller-ww5nj                     1/1     Running     0          12h
-kube-system   rke2-metrics-server-c9c78bd66-7t8sr                     1/1     Running     0          12h
-kube-system   rke2-snapshot-controller-6f7bbb497d-tdz5j               1/1     Running     0          12h
-kube-system   rke2-snapshot-validation-webhook-65b5675d5c-5dpp4       1/1     Running     0          12h
-
 ```
 
 # Installing the Rancher Prime server on a Kubernetes cluster
