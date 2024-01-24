@@ -348,7 +348,6 @@ master3.rke2.com    Ready    control-plane   35h   v1.26.0   192.168.2.106   <no
 worker1.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 worker2.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 worker3.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
-EOF
 ```
 
 # Installing the Rancher Prime server on a Kubernetes cluster
