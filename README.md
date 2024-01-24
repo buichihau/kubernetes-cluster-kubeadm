@@ -350,3 +350,44 @@ worker2.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <no
 worker3.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 ```
 
+## Install Metrics Server with helm
+
+* Create file install
+```
+mkdir -p /k8s
+cd /k8s
+```
+
+* install Metrics Server
+```
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm search repo metrics-server
+helm pull metrics-server/metrics-server --version 3.8.2
+tar -xzf metrics-server-3.8.2.tgz
+```
+
+* fix, edit file value.yaml
+
+vim /k8s/metrics-server/values.yaml
+
+```
+defaultArgs:
+  - --cert-dir=/tmp
+  - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+  - --kubelet-use-node-status-port
+  - --metric-resolution=15s
+  - --secure-port=4443
+  - --kubelet-insecure-tls=true
+```
+
+* Deploy metric-server
+```
+cd /k8s/
+helm install metric-server metrics-server -n kube-system
+```
+
+* Verify metric-server
+```
+kubectl -n kube-system get pods |grep metric
+metric-server-metrics-server-97f9cf9c7-g4c6x                   1/1     Running   0               3m56s
+```
