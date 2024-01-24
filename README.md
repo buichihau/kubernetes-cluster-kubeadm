@@ -12,7 +12,7 @@
 - SELinux: Disabled
 - SWAP : Disabled
 
-![create-ha-cluster-k8s-load-balancing-services.jpg](create-ha-cluster-k8s-load-balancing-services.jpg?raw=true "create-ha-cluster-k8s-load-balancing-services.jpg")
+![ha-cluster-k8s-load-balancing-services.jpg](ha-cluster-k8s-load-balancing-services.jpg?raw=true "ha-cluster-k8s-load-balancing-services.jpg")
 
 ## Step 1 – Set up Linux all nodes k8s
 
