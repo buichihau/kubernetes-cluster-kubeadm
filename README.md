@@ -338,7 +338,7 @@ kubeadm join 192.168.2.85:6443 --token r4w09j.1aeqd3cjk0tl5ttf \
         --discovery-token-ca-cert-hash sha256:91160eda2f93b0f01b82218f78e5735890799b6000cd6e71d03a69ee24d091c0
 ```
 
-* After some time, check the status of the nodes
+* Verify cluster status (on CP node)
 ```
 kubectl get node -owide
 NAME                STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
@@ -350,73 +350,3 @@ worker2.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <no
 worker3.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 ```
 
-# Installing the Rancher Prime server on a Kubernetes cluster
-
-* install helm
-```
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
-```
-
-* add needed helm charts
-```
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
-helm repo add jetstack https://charts.jetstack.io
-```
-
-* Create a Namespace for Rancher and cert-manager
-```
-kubectl create namespace cattle-system
-kubectl create namespace cert-manager
-```
-
-* Apply the certification manager file
-```
-kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.11.0/cert-manager.crds.yaml
-```
-**Link: https://github.com/cert-manager/cert-manager/releases**
-
-* Update repositories
-```
-helm repo update
-```
-
-* Helm install the certificate manager in a new namespace called cert-manager
-```
-helm install cert-manager jetstack/cert-manager \
---namespace cert-manager \
---create-namespace \
---version v1.11.0
-```
-
-* Verify that the cert-manager pods are running
-```
-kubectl get pods --namespace cert-manager
-```
-* Install the latest rancher in the cattle-system namespace and set the hostname
-```
-helm install rancher rancher-latest/rancher \
---namespace cattle-system \
---set hostname=rancher.example.com
-```
-
-* If installed with optional version
-```
-helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname=rancher.example.com --version 2.7.2
-```
-
-* View the status of the deployment
-```
-kubectl -n cattle-system rollout status deploy/rancher
-```
-* check password rancher
-```
-kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}{{"\n"}}'
-```
-
-# Login Rancher
-
-url: https://rancher.example.com/
-
-![login-rancher.png](login-rancher.png?raw=true "login-rancher.png")
