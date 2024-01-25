@@ -393,6 +393,10 @@ metric-server-metrics-server-97f9cf9c7-g4c6x                   1/1     Running  
 ```
 ## 3. Install NGINX ingress controller
 
+### 3.1 Install NGINX ingress controller by bitnami
+
+**https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller**
+
 * create namespace nginx-ingress
 ```
 kubectl create ns nginx-ingress
@@ -450,5 +454,5 @@ deployment.apps/nginx-ingress-controller-default-backend   1/1     1            
 NAME                                                                  DESIRED   CURRENT   READY   AGE
 replicaset.apps/nginx-ingress-controller-6f6c798464                   1         1         1       2m20s
 replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         1         1       2m20s
-
 ```
+
