@@ -464,3 +464,24 @@ replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         
 
 ### 3.2 Install NGINX ingress controller by nginx
 
+**Source: https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/installation-with-helm/#managing-the-chart-via-sources**
+**Source: https://github.com/nginxinc/kubernetes-ingress/tree/v3.4.2/charts/nginx-ingress**
+
+* create namespace nginx-ingress
+```
+kubectl create ns nginx-ingress
+```
+
+* Pulling the Chart
+```
+cd /k8s/
+helm pull oci://ghcr.io/nginxinc/charts/nginx-ingress --untar --version 1.1.2
+```
+
+* Change conf service type from LoadBalancer to nodeport and kind from Deployment to DaemonSet
+
+vim /k8s/nginx-ingress/values.yaml
+
+```
+
+```
