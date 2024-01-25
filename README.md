@@ -465,6 +465,7 @@ replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         
 ### 3.2 Install NGINX ingress controller by nginx
 
 **Source: https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/installation-with-helm/#managing-the-chart-via-sources**
+
 **Source: https://github.com/nginxinc/kubernetes-ingress/tree/v3.4.2/charts/nginx-ingress**
 
 * create namespace nginx-ingress
