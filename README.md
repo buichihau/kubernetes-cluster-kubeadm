@@ -345,9 +345,9 @@ NAME                STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXT
 master1.rke2.com    Ready    control-plane   36h   v1.26.0   192.168.2.104   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 master2.rke2.com    Ready    control-plane   35h   v1.26.0   192.168.2.105   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 master3.rke2.com    Ready    control-plane   35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
-worker1.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
-worker2.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
-worker3.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+worker1.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.107   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+worker2.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.108   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
+worker3.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.109   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 ```
 
 ## 2. Install Metrics Server with helm
@@ -395,7 +395,7 @@ metric-server-metrics-server-97f9cf9c7-g4c6x                   1/1     Running  
 
 ### 3.1 Install NGINX ingress controller by bitnami
 
-**https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller**
+**Source: https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller**
 
 * create namespace nginx-ingress
 ```
@@ -406,15 +406,18 @@ kubectl create ns nginx-ingress
 ```
 cd /k8s/
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm pull bitnami/nginx-ingress-controller --version 10.1.0
-tar -xzf nginx-ingress-controller-10.1.0.tgz
+helm pull bitnami/nginx-ingress-controller --untar --version 10.1.0
 ```
 
-* Change conf service type from LoadBalancer to nodeport
+* Change conf service type from LoadBalancer to nodeport and kind from Deployment to DaemonSet
 
 vim /k8s/nginx-ingress-controller/values.yaml
 
 ```
+kind: DaemonSet
+daemonset:
+  useHostPort: true
+
 service:
   type: NodePort
   ports:
@@ -440,19 +443,24 @@ helm install -n nginx-ingress -f values.yaml nginx-ingress-controller .
 ```
 kubectl get all -n nginx-ingress
 NAME                                                            READY   STATUS    RESTARTS   AGE
-pod/nginx-ingress-controller-6f6c798464-c4828                   1/1     Running   0          2m20s
-pod/nginx-ingress-controller-default-backend-5b6d74fcfb-nplsn   1/1     Running   0          2m20s
+pod/nginx-ingress-controller-9p4br                              1/1     Running   0          2m53s
+pod/nginx-ingress-controller-default-backend-5b6d74fcfb-d48jn   1/1     Running   0          7h12m
+pod/nginx-ingress-controller-jjjts                              1/1     Running   0          7h12m
+pod/nginx-ingress-controller-vqq64                              1/1     Running   0          7h12m
 
 NAME                                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
-service/nginx-ingress-controller                   NodePort    10.99.72.42     <none>        80:30100/TCP,443:30101/TCP   2m20s
-service/nginx-ingress-controller-default-backend   ClusterIP   10.107.178.71   <none>        80/TCP                       2m20s
+service/nginx-ingress-controller                   NodePort    10.96.158.41    <none>        80:30100/TCP,443:30101/TCP   7h12m
+service/nginx-ingress-controller-default-backend   ClusterIP   10.109.47.130   <none>        80/TCP                       7h12m
+
+NAME                                      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/nginx-ingress-controller   3         3         3       3            3           <none>          7h12m
 
 NAME                                                       READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/nginx-ingress-controller                   1/1     1            1           2m20s
-deployment.apps/nginx-ingress-controller-default-backend   1/1     1            1           2m20s
+deployment.apps/nginx-ingress-controller-default-backend   1/1     1            1           7h12m
 
 NAME                                                                  DESIRED   CURRENT   READY   AGE
-replicaset.apps/nginx-ingress-controller-6f6c798464                   1         1         1       2m20s
-replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         1         1       2m20s
+replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         1         1       7h12m
 ```
+
+### 3.2 Install NGINX ingress controller by nginx
 
