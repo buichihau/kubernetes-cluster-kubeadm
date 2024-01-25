@@ -350,7 +350,7 @@ worker2.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <no
 worker3.rke2.com    Ready    <none>          35h   v1.26.0   192.168.2.106   <none>        CentOS Linux 7 (Core)   3.10.0-1160.90.1.el7.x86_64   containerd://1.6.27
 ```
 
-## Install Metrics Server with helm
+## 2. Install Metrics Server with helm
 
 * Create file install
 ```
@@ -390,4 +390,65 @@ helm install metric-server metrics-server -n kube-system
 ```
 kubectl -n kube-system get pods |grep metric
 metric-server-metrics-server-97f9cf9c7-g4c6x                   1/1     Running   0               3m56s
+```
+## 3. Install NGINX ingress controller
+
+* create namespace nginx-ingress
+```
+kubectl create ns nginx-ingress
+```
+
+* Pull source chart nginx-ingress-controller
+```
+cd /k8s/
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm pull bitnami/nginx-ingress-controller --version 10.1.0
+tar -xzf nginx-ingress-controller-10.1.0.tgz
+```
+
+* Change conf service type from LoadBalancer to nodeport
+
+vim /k8s/nginx-ingress-controller/values.yaml
+
+```
+service:
+  type: NodePort
+  ports:
+    http: 80
+    https: 443
+  targetPorts:
+    http: http
+    https: https
+  nodePorts:
+    http: "30100"
+    https: "30101"
+    tcp: {}
+    udp: {}
+```
+
+* Deploy nginx-ingress-controller
+```
+cd /k8s/nginx-ingress-controller
+helm install -n nginx-ingress -f values.yaml nginx-ingress-controller .
+```
+
+* Verify nginx-ingress-controller
+```
+kubectl get all -n nginx-ingress
+NAME                                                            READY   STATUS    RESTARTS   AGE
+pod/nginx-ingress-controller-6f6c798464-c4828                   1/1     Running   0          2m20s
+pod/nginx-ingress-controller-default-backend-5b6d74fcfb-nplsn   1/1     Running   0          2m20s
+
+NAME                                               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/nginx-ingress-controller                   NodePort    10.99.72.42     <none>        80:30100/TCP,443:30101/TCP   2m20s
+service/nginx-ingress-controller-default-backend   ClusterIP   10.107.178.71   <none>        80/TCP                       2m20s
+
+NAME                                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx-ingress-controller                   1/1     1            1           2m20s
+deployment.apps/nginx-ingress-controller-default-backend   1/1     1            1           2m20s
+
+NAME                                                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/nginx-ingress-controller-6f6c798464                   1         1         1       2m20s
+replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         1         1       2m20s
+
 ```
