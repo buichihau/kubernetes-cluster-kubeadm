@@ -497,3 +497,21 @@ service:
 cd /k8s/ingress-nginx
 helm install -n nginx-ingress ingress-nginx .
 ```
+
+* Verify nginx-ingress-controller
+
+```
+kubectl get all -n nginx-ingress
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/ingress-nginx-controller-cprzp   1/1     Running   0          91m
+pod/ingress-nginx-controller-pgzc9   1/1     Running   0          91m
+pod/ingress-nginx-controller-v8bqv   1/1     Running   0          91m
+
+NAME                                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/ingress-nginx-controller             NodePort    10.96.152.204   <none>        80:30100/TCP,443:30101/TCP   91m
+service/ingress-nginx-controller-admission   ClusterIP   10.102.167.58   <none>        443/TCP                      91m
+
+NAME                                      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/ingress-nginx-controller   3         3         3       3            3           kubernetes.io/os=linux   91m
+
+```
