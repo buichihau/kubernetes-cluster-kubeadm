@@ -515,3 +515,32 @@ NAME                                      DESIRED   CURRENT   READY   UP-TO-DATE
 daemonset.apps/ingress-nginx-controller   3         3         3       3            3           kubernetes.io/os=linux   91m
 
 ```
+
+## Run End-to-end test
+
+* Deploy nginx 
+```
+kubectl apply -f https://k8s.io/examples/application/deployment.yaml
+```
+
+* Verify pod can run
+```
+kubectl get pods
+kubectl get deployments
+```
+
+* View logs
+```
+kubectl logs -f pod-id
+```
+
+* Service can access
+```
+kubectl expose deployment nginx-deployment --type NodePort --port 80
+kubectl get services
+```
+
+* Check access
+```
+curl --head http://localhost:nodeport
+```
