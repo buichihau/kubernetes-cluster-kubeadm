@@ -464,9 +464,7 @@ replicaset.apps/nginx-ingress-controller-default-backend-5b6d74fcfb   1         
 
 ### 3.2 Install NGINX ingress controller by nginx
 
-**Source: https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/installation-with-helm/#managing-the-chart-via-sources**
-
-**Source: https://github.com/nginxinc/kubernetes-ingress/tree/v3.4.2/charts/nginx-ingress**
+**Source: https://kubernetes.github.io/ingress-nginx/deploy/**
 
 * create namespace nginx-ingress
 ```
@@ -476,13 +474,26 @@ kubectl create ns nginx-ingress
 * Pulling the Chart
 ```
 cd /k8s/
-helm pull oci://ghcr.io/nginxinc/charts/nginx-ingress --untar --version 1.1.2
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm pull ingress-nginx/ingress-nginx --untar --version 4.9.0
 ```
 
 * Change conf service type from LoadBalancer to nodeport and kind from Deployment to DaemonSet
 
-vim /k8s/nginx-ingress/values.yaml
+vim /k8s/ingress-nginx/values.yaml
 
 ```
+service:
+  type: NodePort
+  nodePorts:
+      # -- Node port allocated for the external HTTP listener. If left empty, the service controller allocates one from the configured node port range.
+      http: "30100"
+      # -- Node port allocated for the external HTTPS listener. If left empty, the service controller allocates one from the configured node port range.
+      https: "30101"
+```
 
+* Deploy nginx-ingress-controller
+```
+cd /k8s/ingress-nginx
+helm install -n nginx-ingress ingress-nginx .
 ```
