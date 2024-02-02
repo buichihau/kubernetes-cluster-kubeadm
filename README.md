@@ -544,3 +544,5 @@ kubectl get services
 ```
 curl --head http://localhost:nodeport
 ```
+
+## 4. 
