@@ -83,6 +83,8 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 
+sudo yum clean all && sudo yum -y makecache
+
 VERSION=1.26.0
 
 yum install -y kubelet-$VERSION-0 kubeadm-$VERSION-0 kubectl-$VERSION-0 --disableexcludes=kubernetes
