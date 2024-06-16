@@ -595,3 +595,4 @@ ETCDCTL_API=3 etcdctl snapshot restore <backup-file-location>
 
 
 ## 5. Upgrade Kubernetes Cluster Using Kubeadm 
+**link: https://devopscube.com/upgrade-kubernetes-cluster-kubeadm/**
