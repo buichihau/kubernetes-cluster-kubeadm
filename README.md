@@ -551,13 +551,39 @@ curl --head http://localhost:nodeport
 
 ![etcd.png](etcd.png?raw=true "etcd.png")
 
-* install etcdctl 
+**Etcd Backup**
+* Install etcdctl 
 ```
 sudo apt install etcd-client
 ```
 
 * Validate info 
-etcd endpoint (–endpoints)
-ca certificate (–cacert)
-server certificate (–cert)
-server key (–key)
+  - etcd endpoint (–endpoints)
+  - ca certificate (–cacert)
+  - server certificate (–cert)
+  - server key (–key)
+
+from /etc/kubernetes/manifests/etcd.yaml
+
+* etcd snapshot backup using cmd
+```
+ETCDCTL_API=3 etcdctl \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  snapshot save etcd.db
+```
+
+* Verify the snapshot
+```
+ ETCDCTL_API=3 etcdctl --write-out=table snapshot status  etcd.db
+Deprecated: Use `etcdutl snapshot status` instead.
+
++----------+----------+------------+------------+
+|   HASH   | REVISION | TOTAL KEYS | TOTAL SIZE |
++----------+----------+------------+------------+
+| 7ad10694 | 21275968 |       3022 |      39 MB |
++----------+----------+------------+------------+
+```
+**Etcd Restore**
