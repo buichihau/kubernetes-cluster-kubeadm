@@ -587,3 +587,11 @@ Deprecated: Use `etcdutl snapshot status` instead.
 +----------+----------+------------+------------+
 ```
 **Etcd Restore**
+
+* Command to restore etcd
+```
+ETCDCTL_API=3 etcdctl snapshot restore <backup-file-location>
+```
+
+
+## 5. Upgrade Kubernetes Cluster Using Kubeadm 
