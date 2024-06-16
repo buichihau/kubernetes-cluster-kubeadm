@@ -547,4 +547,17 @@ kubectl get services
 curl --head http://localhost:nodeport
 ```
 
-## 4. 
+## 4. Etcd Backup and Restore on Kubernetes 
+
+![etcd.png](etcd.png?raw=true "etcd.png")
+
+* install etcdctl 
+```
+sudo apt install etcd-client
+```
+
+* Validate info 
+etcd endpoint (–endpoints)
+ca certificate (–cacert)
+server certificate (–cert)
+server key (–key)
